@@ -1,3 +1,5 @@
 transformers
 streamlit
 pandas
+tensorflow
+pytorch
