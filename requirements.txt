@@ -2,4 +2,4 @@ transformers
 streamlit
 pandas
 tensorflow
-pytorch
+torch
