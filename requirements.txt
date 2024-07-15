@@ -1,4 +1,3 @@
 transformers
 streamlit
 pandas
-base64
