@@ -1,7 +1,11 @@
+import os
 import streamlit as st
 import pandas as pd
 from transformers import pipeline
 import base64
+
+# Set to use CPU only
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 # Load pipelines
 sentiment_pipe = pipeline("text-classification", model="ayameRushia/bert-base-indonesian-1.5G-sentiment-analysis-smsa")
