@@ -3,4 +3,4 @@ streamlit
 pandas
 tensorflow
 torch
-keras
+tf-keras
