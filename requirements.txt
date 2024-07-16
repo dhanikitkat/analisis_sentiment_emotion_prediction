@@ -1,7 +1,6 @@
 transformers
 streamlit
 pandas
-tensorflow
 tensorflow-cpu
 torch
 tf-keras
