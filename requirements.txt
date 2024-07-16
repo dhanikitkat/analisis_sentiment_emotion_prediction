@@ -4,3 +4,4 @@ pandas
 tensorflow-cpu
 torch
 tf-keras
+openpyxl
