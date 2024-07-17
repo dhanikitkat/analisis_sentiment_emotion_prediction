@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import numpy as np
 from PIL import ImageFont
+import os
+
 
 nltk.download('punkt')
 
@@ -51,7 +53,7 @@ def generate_wordcloud(text, font_path, title, colormap):
         width=600,
         height=600,
         background_color='white',
-        font_path='assets\Poppins-Regular.ttf',
+        font_path=font_path,
         prefer_horizontal=1.0,
         colormap=colormap,
         max_words=100
@@ -98,7 +100,7 @@ def combined_analysis(text, slank_formal_df):
     st.plotly_chart(fig_emotion, use_container_width=True)
 
     # Generate word clouds
-    font_path = 'assets\Poppins-Regular.ttf'
+    font_path = os.path.join('assets', 'Poppins-Regular.ttf')
     
     # Overall word cloud
     overall_text = ' '.join(df['Cleaned Content'].dropna())
@@ -162,7 +164,7 @@ def process_file(file, slank_formal_df):
     st.plotly_chart(fig_emotion, use_container_width=True)
 
     # Generate word clouds
-    font_path = 'assets\Poppins-Regular.ttf'
+    font_path = os.path.join('assets', 'Poppins-Regular.ttf')
     
     # Overall word cloud
     overall_text = ' '.join(df['Cleaned Content'].dropna())
