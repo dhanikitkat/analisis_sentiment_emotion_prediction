@@ -96,6 +96,9 @@ def combined_analysis(text, slank_formal_df):
     emotion_counts = df['Emotion'].value_counts()
     fig_emotion = px.pie(emotion_counts, values=emotion_counts.values, names=emotion_counts.index, title='Emotion Distribution')
     st.plotly_chart(fig_emotion, use_container_width=True)
+
+    # Generate word clouds
+    font_path = 'assets\Poppins-Regular.ttf'
     
     # Overall word cloud
     overall_text = ' '.join(df['Cleaned Content'].dropna())
