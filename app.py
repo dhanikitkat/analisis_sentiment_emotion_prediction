@@ -12,6 +12,8 @@ from wordcloud import WordCloud
 import numpy as np
 from PIL import ImageFont
 
+nltk.download('punkt')
+
 
 # Load pipelines
 sentiment_pipe = pipeline("text-classification", model="ayameRushia/bert-base-indonesian-1.5G-sentiment-analysis-smsa")
@@ -160,7 +162,7 @@ def process_file(file, slank_formal_df):
     st.plotly_chart(fig_emotion, use_container_width=True)
 
     # Generate word clouds
-    font_path = 'Poppins-Regular.ttf'
+    font_path = 'assets\Poppins-Regular.ttf'
     
     # Overall word cloud
     overall_text = ' '.join(df['Cleaned Content'].dropna())
@@ -208,7 +210,7 @@ def get_word_freq_download_link(word_freq_df):
     return href
 
 def main():
-    st.title("Aplikasi Analisis Sentimen dan Prediksi Emosi by Ramdhani")
+    st.title("Aplikasi Analisis Sentimen dan Prediksi Emosi")
 
     slank_file = st.file_uploader("Upload file slank (CSV atau TXT)", type=["csv", "txt"])
     if slank_file is not None:
