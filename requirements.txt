@@ -5,3 +5,8 @@ tensorflow-cpu
 torch
 tf-keras
 openpyxl
+nltk
+plotly
+matplotlib
+wordcloud
+numpy
