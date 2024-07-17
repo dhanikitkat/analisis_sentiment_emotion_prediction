@@ -176,7 +176,7 @@ def process_file(file, slank_formal_df):
 
     # Negative sentiment and angry or sad emotion word cloud
     negative_angry_sad_text = ' '.join(df[(df['Sentiment'] == 'negative') & (df['Emotion'].isin(['marah', 'sedih']))]['Cleaned Content'].dropna())
-    generate_wordcloud(negative_angry_sad_text, font_path, 'Negative Sentiment & Angry or stSad Emotion Word Cloud', 'Reds')
+    generate_wordcloud(negative_angry_sad_text, font_path, 'Negative Sentiment & Angry or Sad Emotion Word Cloud', 'Reds')
 
     # Word frequency
     word_freq = pd.Series(' '.join(df['Cleaned Content'].dropna()).split()).value_counts()
