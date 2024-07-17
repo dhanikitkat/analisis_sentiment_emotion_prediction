@@ -48,8 +48,8 @@ def preprocess_text(text, slank_formal_df):
 
 def generate_wordcloud(text, font_path, title, colormap):
     wordcloud = WordCloud(
-        width=800,
-        height=800,
+        width=600,
+        height=600,
         background_color='white',
         font_path='assets\Poppins-Regular.ttf',
         prefer_horizontal=1.0,
