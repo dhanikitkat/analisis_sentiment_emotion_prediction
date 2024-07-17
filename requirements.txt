@@ -10,4 +10,3 @@ plotly
 matplotlib
 wordcloud
 numpy
-os
