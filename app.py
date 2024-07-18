@@ -77,6 +77,31 @@ def get_image_download_link(image_path):
     href = f'<a href="data:file/png;base64,{b64}" download="{image_path}">Download {image_path}</a>'
     return href
 
+def analyze_sentiment(text):
+    result = sentiment_pipe(text)[0]
+    return result['label'].lower(), result['score']
+
+def analyze_emotion(text):
+    result = emotion_pipe(text)[0]
+    return result['label'].lower(), result['score']
+
+def get_download_link(df, filename):
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="{filename}.csv">Download CSV</a>'
+    return href
+
+def get_word_freq_download_link(word_freq_df):
+    csv = word_freq_df.to_csv(index=True)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="word_frequency.csv">Download Word Frequency CSV</a>'
+    return href
+
+def get_example_download_link(file_path, link_text):
+    with open(file_path, "rb") as file:
+        b64 = base64.b64encode(file.read()).decode()
+    return f'<a href="data:file/txt;base64,{b64}" download="{os.path.basename(file_path)}">{link_text}</a>'
+
 
 def combined_analysis(text, slank_formal_df):
     texts = text.split('\n')
@@ -125,8 +150,6 @@ def combined_analysis(text, slank_formal_df):
     st.markdown(get_word_freq_download_link(word_freq_df), unsafe_allow_html=True)
 
     return df
-
-
 
 def process_file(file, slank_formal_df):
     if file.name.endswith('.xlsx'):
@@ -190,31 +213,14 @@ def process_file(file, slank_formal_df):
 
     return df
 
-
-def analyze_sentiment(text):
-    result = sentiment_pipe(text)[0]
-    return result['label'].lower(), result['score']
-
-def analyze_emotion(text):
-    result = emotion_pipe(text)[0]
-    return result['label'].lower(), result['score']
-
-def get_download_link(df, filename):
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="{filename}.csv">Download CSV</a>'
-    return href
-
-def get_word_freq_download_link(word_freq_df):
-    csv = word_freq_df.to_csv(index=True)
-    b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="word_frequency.csv">Download Word Frequency CSV</a>'
-    return href
-
 def main():
     st.title("Aplikasi Analisis Sentimen dan Prediksi Emosi")
 
-    slank_file = st.file_uploader("Upload file slank (CSV atau TXT)", type=["csv", "txt"])
+    # Add download link for example slank template
+    slank_template_path = "assets\contoh template data slank.txt"
+    st.markdown(get_example_download_link(slank_template_path, "Download Contoh Template Data Slank (TXT)"), unsafe_allow_html=True)
+
+    slank_file = st.file_uploader("Upload file slank dengan baris pertama Slank;Formal (TXT)", type=["txt"])
     if slank_file is not None:
         df_slank_formal = load_slank_formal(slank_file)
         if df_slank_formal is None:
@@ -234,6 +240,10 @@ def main():
             st.markdown(get_download_link(df, "analisis_sentimen_emosi"), unsafe_allow_html=True)
             
     elif menu == "Import dari File":
+        # Add download link for example content template
+        content_template_path = "assets\contoh template data content.xlsx"
+        st.markdown(get_example_download_link(content_template_path, "Download Contoh Template Data Content (XLSX)"), unsafe_allow_html=True)
+        
         uploaded_file = st.file_uploader("Upload file CSV atau XLSX", type=["csv", "xlsx"])
         if uploaded_file is not None:
             df = process_file(uploaded_file, df_slank_formal)
