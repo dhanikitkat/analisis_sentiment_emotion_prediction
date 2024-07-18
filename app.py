@@ -137,7 +137,7 @@ def combined_analysis(text, slank_formal_df):
             justify-content: center;
         }
         .user-select-none.svg-container {
-            height: 350px !important;
+            height: 360px !important;
         }
         .average-score {
             text-align: center;
@@ -245,7 +245,7 @@ def process_file(file, slank_formal_df):
             justify-content: center;
         }
         .user-select-none.svg-container {
-            height: 350px !important;
+            height: 360px !important;
         }
         .average-score {
             text-align: center;
