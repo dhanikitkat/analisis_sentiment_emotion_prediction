@@ -217,7 +217,7 @@ def main():
     st.title("Aplikasi Analisis Sentimen dan Prediksi Emosi")
 
     # Add download link for example slank template
-    slank_template_path = "assets\contoh template data slank.txt"
+    slank_template_path = "assets/contoh template data slank.txt"
     st.markdown(get_example_download_link(slank_template_path, "Download Contoh Template Data Slank (TXT)"), unsafe_allow_html=True)
 
     slank_file = st.file_uploader("Upload file slank dengan baris pertama Slank;Formal (TXT)", type=["txt"])
@@ -241,7 +241,7 @@ def main():
             
     elif menu == "Import dari File":
         # Add download link for example content template
-        content_template_path = "assets\contoh template data content.xlsx"
+        content_template_path = "assets/contoh template data content.xlsx"
         st.markdown(get_example_download_link(content_template_path, "Download Contoh Template Data Content (XLSX)"), unsafe_allow_html=True)
         
         uploaded_file = st.file_uploader("Upload file CSV atau XLSX", type=["csv", "xlsx"])
