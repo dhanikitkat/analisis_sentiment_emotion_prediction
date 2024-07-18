@@ -15,7 +15,7 @@ import os
 
 
 nltk.download('punkt')
-
+nltk.download('stopwords')
 
 # Load pipelines
 sentiment_pipe = pipeline("text-classification", model="ayameRushia/bert-base-indonesian-1.5G-sentiment-analysis-smsa")
@@ -48,25 +48,40 @@ def preprocess_text(text, slank_formal_df):
     preprocessed_text = ' '.join(tokens)
     return preprocessed_text
 
-def generate_wordcloud(text, font_path, title, colormap):
+def generate_wordcloud(text, font_path, colormap, title):
+    # Create a circular mask for Full HD resolution
+    x, y = np.ogrid[:1400, :1400]  # Adjusted for 1400x1400 resolution
+    mask = (x - 700) ** 2 + (y - 700) ** 2 > 630 ** 2  # Adjusted mask size for 1400x1400 resolution
+    mask = 255 * mask.astype(int)
+
+    # Remove Indonesian stopwords
+    indo_stopwords = set(stopwords.words('indonesian'))
+    words = text.split()
+    words = [word for word in words if word.lower() not in indo_stopwords]
+    text = ' '.join(words)
+
     wordcloud = WordCloud(
-        width=600,
-        height=600,
+        width=1400,
+        height=1400,
         background_color='white',
         font_path=font_path,
         prefer_horizontal=1.0,
         colormap=colormap,
-        max_words=100
+        max_words=100,
+        mask=mask
     ).generate(text)
     
-    plt.figure(figsize=(10, 10))
-    plt.title(title, fontsize=20)
+    # Configure plot settings for high-quality output
+    plt.figure(figsize=(14, 14))  # Adjusted figure size for 1400x1400 resolution
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.axis('off')
-    st.pyplot(plt)
-    
-    # Save word cloud to file
-    wordcloud.to_file(f"{title}.png")
+    plt.title(title, fontsize=20, pad=20)  # Title directly in matplotlib plot
+
+    # Save word cloud to file with high DPI for better quality
+    plt.savefig(f"{title}.png", dpi=300, bbox_inches='tight', pad_inches=0.1)
+
+    # Display word cloud in Streamlit
+    st.image(f"{title}.png", use_column_width=True)
 
     # Add download link for word cloud
     st.markdown(get_image_download_link(f"{title}.png"), unsafe_allow_html=True)
@@ -102,7 +117,6 @@ def get_example_download_link(file_path, link_text):
         b64 = base64.b64encode(file.read()).decode()
     return f'<a href="data:file/txt;base64,{b64}" download="{os.path.basename(file_path)}">{link_text}</a>'
 
-
 def combined_analysis(text, slank_formal_df):
     texts = text.split('\n')
     results = []
@@ -114,30 +128,76 @@ def combined_analysis(text, slank_formal_df):
             results.append((text, cleaned_text, sentiment_result['label'].lower(), sentiment_result['score'], emotion_result['label'].lower(), emotion_result['score']))
     df = pd.DataFrame(results, columns=['Content', 'Cleaned Content', 'Sentiment', 'Score Sentiment', 'Emotion', 'Score Emotion'])
     
+    # Define custom CSS to adjust the height
+    st.markdown(
+        """
+        <style>
+        .chart-container {
+            display: flex;
+            justify-content: center;
+        }
+        .user-select-none.svg-container {
+            height: 350px !important;
+        }
+        .average-score {
+            text-align: center;
+        }
+        </style>
+        """, 
+        unsafe_allow_html=True
+    )
+
     # Sentiment pie chart
     sentiment_counts = df['Sentiment'].value_counts()
-    fig_sentiment = px.pie(sentiment_counts, values=sentiment_counts.values, names=sentiment_counts.index, title='Sentiment Distribution')
+    fig_sentiment = px.pie(sentiment_counts, values=sentiment_counts.values, names=sentiment_counts.index, title='Sentiment Distribution', width=400, height=400)
+
+    # Calculate sentiment average
+    sentiment_average = df['Score Sentiment'].mean()
+
+    # Add average sentiment score as an annotation
+    fig_sentiment.add_annotation(
+        text=f"Average Sentiment Score: {sentiment_average:.4f}",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.2,
+        showarrow=False,
+        font=dict(size=18)
+    )
+
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
     st.plotly_chart(fig_sentiment, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Emotion pie chart
     emotion_counts = df['Emotion'].value_counts()
-    fig_emotion = px.pie(emotion_counts, values=emotion_counts.values, names=emotion_counts.index, title='Emotion Distribution')
-    st.plotly_chart(fig_emotion, use_container_width=True)
+    fig_emotion = px.pie(emotion_counts, values=emotion_counts.values, names=emotion_counts.index, title='Emotion Distribution', width=400, height=400)
 
+    # Calculate emotion average
+    emotion_average = df['Score Emotion'].mean()
+
+    # Add average emotion score as an annotation
+    fig_emotion.add_annotation(
+        text=f"Average Emotion Score: {emotion_average:.4f}",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.2,
+        showarrow=False,
+        font=dict(size=18)
+    )
+
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+    st.plotly_chart(fig_emotion, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     # Generate word clouds
     font_path = os.path.join('assets', 'Poppins-Regular.ttf')
     
-    # Overall word cloud
+    # Ensure `df` is your DataFrame and 'Cleaned Content', 'Sentiment', and 'Emotion' columns exist
     overall_text = ' '.join(df['Cleaned Content'].dropna())
-    generate_wordcloud(overall_text, font_path, 'Overall Word Cloud', 'viridis')
-    
-    # Positive sentiment and happy emotion word cloud
-    positive_happy_text = ' '.join(df[(df['Sentiment'] == 'positive') & (df['Emotion'] == 'senang')]['Cleaned Content'].dropna())
-    generate_wordcloud(positive_happy_text, font_path, 'Positive Sentiment & Happy Emotion Word Cloud', 'Greens')
+    generate_wordcloud(overall_text, font_path, 'hsv_r', 'Overall Word Cloud')
 
-    # Negative sentiment and angry or sad emotion word cloud
+    positive_happy_text = ' '.join(df[(df['Sentiment'] == 'positive') & (df['Emotion'] == 'senang')]['Cleaned Content'].dropna())
+    generate_wordcloud(positive_happy_text, font_path, 'gist_rainbow_r', 'Positive Sentiment & Happy Emotion Word Cloud')
+
     negative_angry_sad_text = ' '.join(df[(df['Sentiment'] == 'negative') & (df['Emotion'].isin(['marah', 'sedih']))]['Cleaned Content'].dropna())
-    generate_wordcloud(negative_angry_sad_text, font_path, 'Negative Sentiment & Angry or Sad Emotion Word Cloud', 'Reds')
+    generate_wordcloud(negative_angry_sad_text, font_path, 'inferno', 'Negative Sentiment & Angry or Sad Emotion Word Cloud')
 
     # Word frequency
     word_freq = pd.Series(' '.join(df['Cleaned Content'].dropna()).split()).value_counts()
@@ -176,30 +236,77 @@ def process_file(file, slank_formal_df):
     df['Emotion'] = [r[4] for r in results]
     df['Score Emotion'] = [r[5] for r in results]
 
+    # Define custom CSS to adjust the height
+    st.markdown(
+        """
+        <style>
+        .chart-container {
+            display: flex;
+            justify-content: center;
+        }
+        .user-select-none.svg-container {
+            height: 350px !important;
+        }
+        .average-score {
+            text-align: center;
+        }
+        </style>
+        """, 
+        unsafe_allow_html=True
+    )
+
     # Sentiment pie chart
     sentiment_counts = df['Sentiment'].value_counts()
-    fig_sentiment = px.pie(sentiment_counts, values=sentiment_counts.values, names=sentiment_counts.index, title='Sentiment Distribution')
+    fig_sentiment = px.pie(sentiment_counts, values=sentiment_counts.values, names=sentiment_counts.index, title='Sentiment Distribution', width=400, height=400)
+
+    # Calculate sentiment average
+    sentiment_average = df['Score Sentiment'].mean()
+
+    # Add average sentiment score as an annotation
+    fig_sentiment.add_annotation(
+        text=f"Average Sentiment Score: {sentiment_average:.4f}",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.2,
+        showarrow=False,
+        font=dict(size=18)
+    )
+
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
     st.plotly_chart(fig_sentiment, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Emotion pie chart
     emotion_counts = df['Emotion'].value_counts()
-    fig_emotion = px.pie(emotion_counts, values=emotion_counts.values, names=emotion_counts.index, title='Emotion Distribution')
+    fig_emotion = px.pie(emotion_counts, values=emotion_counts.values, names=emotion_counts.index, title='Emotion Distribution', width=400, height=400)
+
+    # Calculate emotion average
+    emotion_average = df['Score Emotion'].mean()
+
+    # Add average emotion score as an annotation
+    fig_emotion.add_annotation(
+        text=f"Average Emotion Score: {emotion_average:.4f}",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.2,
+        showarrow=False,
+        font=dict(size=18)
+    )
+
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
     st.plotly_chart(fig_emotion, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Generate word clouds
     font_path = os.path.join('assets', 'Poppins-Regular.ttf')
     
-    # Overall word cloud
+    # Ensure `df` is your DataFrame and 'Cleaned Content', 'Sentiment', and 'Emotion' columns exist
     overall_text = ' '.join(df['Cleaned Content'].dropna())
-    generate_wordcloud(overall_text, font_path, 'Overall Word Cloud', 'viridis')
-    
-    # Positive sentiment and happy emotion word cloud
-    positive_happy_text = ' '.join(df[(df['Sentiment'] == 'positive') & (df['Emotion'] == 'senang')]['Cleaned Content'].dropna())
-    generate_wordcloud(positive_happy_text, font_path, 'Positive Sentiment & Happy Emotion Word Cloud', 'Greens')
+    generate_wordcloud(overall_text, font_path, 'hsv_r', 'Overall Word Cloud')
 
-    # Negative sentiment and angry or sad emotion word cloud
+    positive_happy_text = ' '.join(df[(df['Sentiment'] == 'positive') & (df['Emotion'] == 'senang')]['Cleaned Content'].dropna())
+    generate_wordcloud(positive_happy_text, font_path, 'gist_rainbow_r', 'Positive Sentiment & Happy Emotion Word Cloud')
+
     negative_angry_sad_text = ' '.join(df[(df['Sentiment'] == 'negative') & (df['Emotion'].isin(['marah', 'sedih']))]['Cleaned Content'].dropna())
-    generate_wordcloud(negative_angry_sad_text, font_path, 'Negative Sentiment & Angry or Sad Emotion Word Cloud', 'Reds')
+    generate_wordcloud(negative_angry_sad_text, font_path, 'inferno', 'Negative Sentiment & Angry or Sad Emotion Word Cloud')
 
     # Word frequency
     word_freq = pd.Series(' '.join(df['Cleaned Content'].dropna()).split()).value_counts()
