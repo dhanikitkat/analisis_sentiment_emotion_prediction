@@ -14,6 +14,14 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
+      - name: Remove Negative Sentiment & Angry or Sad Emotion Word Cloud.png
+        run: git filter-branch --force --index-filter "git rm --cached --ignore-unmatch 'Negative Sentiment & Angry or Sad Emotion Word Cloud.png'" --prune-empty --tag-name-filter cat -- --all
+
+      - name: Remove Overall Word Cloud.png
+        run: git filter-branch --force --index-filter "git rm --cached --ignore-unmatch 'Overall Word Cloud.png'" --prune-empty --tag-name-filter cat -- --all
+
+      - name: Remove Positive Sentiment & Happy Emotion Word Cloud.png
+        run: git filter-branch --force --index-filter "git rm --cached --ignore-unmatch 'Positive Sentiment & Happy Emotion Word Cloud.png'" --prune-empty --tag-name-filter cat -- --all
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
