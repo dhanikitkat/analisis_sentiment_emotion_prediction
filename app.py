@@ -86,12 +86,6 @@ def generate_wordcloud(text, font_path, colormap, title):
     # Add download link for word cloud
     st.markdown(get_image_download_link(f"{title}.png"), unsafe_allow_html=True)
 
-def get_image_download_link(image_path):
-    with open(image_path, "rb") as image_file:
-        b64 = base64.b64encode(image_file.read()).decode()
-    href = f'<a href="data:file/png;base64,{b64}" download="{image_path}">Download {image_path}</a>'
-    return href
-
 def analyze_sentiment(text):
     result = sentiment_pipe(text)[0]
     return result['label'].lower(), result['score']
@@ -116,6 +110,12 @@ def get_example_download_link(file_path, link_text):
     with open(file_path, "rb") as file:
         b64 = base64.b64encode(file.read()).decode()
     return f'<a href="data:file/txt;base64,{b64}" download="{os.path.basename(file_path)}">{link_text}</a>'
+
+def get_image_download_link(image_path):
+    with open(image_path, "rb") as image_file:
+        b64 = base64.b64encode(image_file.read()).decode()
+    href = f'<a href="data:file/png;base64,{b64}" download="{image_path}">Download {image_path}</a>'
+    return href
 
 def combined_analysis(text, slank_formal_df):
     texts = text.split('\n')
@@ -147,9 +147,24 @@ def combined_analysis(text, slank_formal_df):
         unsafe_allow_html=True
     )
 
-    # Sentiment pie chart
+        # Sentiment pie chart
     sentiment_counts = df['Sentiment'].value_counts()
-    fig_sentiment = px.pie(sentiment_counts, values=sentiment_counts.values, names=sentiment_counts.index, title='Sentiment Distribution', width=400, height=400)
+    sentiment_colors = {
+        'positive': px.colors.qualitative.Set3[0],
+        'negative': px.colors.qualitative.Set3[3],
+        'neutral': px.colors.qualitative.Set3[1]
+    }
+
+    fig_sentiment = px.pie(
+        sentiment_counts,
+        values=sentiment_counts.values,
+        names=sentiment_counts.index,
+        title='Sentiment Distribution',
+        width=400,
+        height=400,
+        color=sentiment_counts.index,
+        color_discrete_map=sentiment_colors
+    )
 
     # Calculate sentiment average
     sentiment_average = df['Score Sentiment'].mean()
@@ -168,8 +183,26 @@ def combined_analysis(text, slank_formal_df):
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Emotion pie chart
+     # Sentiment pie chart
     emotion_counts = df['Emotion'].value_counts()
-    fig_emotion = px.pie(emotion_counts, values=emotion_counts.values, names=emotion_counts.index, title='Emotion Distribution', width=400, height=400)
+    emotion_colors = {
+        'marah': px.colors.qualitative.Safe[9],
+        'sedih': px.colors.qualitative.Safe[1],
+        'senang': px.colors.qualitative.Safe[0],
+        'cinta': px.colors.qualitative.Safe[2],
+        'jijik': px.colors.qualitative.Safe[6],
+        'takut': px.colors.qualitative.Safe[7],
+    }
+    fig_emotion = px.pie(
+        emotion_counts, 
+        values=emotion_counts.values, 
+        names=emotion_counts.index, 
+        title='Emotion Distribution', 
+        width=400, 
+        height=400, 
+        color=emotion_counts.index, 
+        color_discrete_map=emotion_colors
+    )
 
     # Calculate emotion average
     emotion_average = df['Score Emotion'].mean()
@@ -186,6 +219,7 @@ def combined_analysis(text, slank_formal_df):
     st.markdown('<div class="chart-container">', unsafe_allow_html=True)
     st.plotly_chart(fig_emotion, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+
     # Generate word clouds
     font_path = os.path.join('assets', 'Poppins-Regular.ttf')
     
@@ -255,9 +289,24 @@ def process_file(file, slank_formal_df):
         unsafe_allow_html=True
     )
 
-    # Sentiment pie chart
+        # Sentiment pie chart
     sentiment_counts = df['Sentiment'].value_counts()
-    fig_sentiment = px.pie(sentiment_counts, values=sentiment_counts.values, names=sentiment_counts.index, title='Sentiment Distribution', width=400, height=400)
+    sentiment_colors = {
+        'positive': px.colors.qualitative.Set3[0],
+        'negative': px.colors.qualitative.Set3[3],
+        'neutral': px.colors.qualitative.Set3[1]
+    }
+
+    fig_sentiment = px.pie(
+        sentiment_counts,
+        values=sentiment_counts.values,
+        names=sentiment_counts.index,
+        title='Sentiment Distribution',
+        width=400,
+        height=400,
+        color=sentiment_counts.index,
+        color_discrete_map=sentiment_colors
+    )
 
     # Calculate sentiment average
     sentiment_average = df['Score Sentiment'].mean()
@@ -276,8 +325,26 @@ def process_file(file, slank_formal_df):
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Emotion pie chart
+     # Sentiment pie chart
     emotion_counts = df['Emotion'].value_counts()
-    fig_emotion = px.pie(emotion_counts, values=emotion_counts.values, names=emotion_counts.index, title='Emotion Distribution', width=400, height=400)
+    emotion_colors = {
+        'marah': px.colors.qualitative.Safe[9],
+        'sedih': px.colors.qualitative.Safe[1],
+        'senang': px.colors.qualitative.Safe[0],
+        'cinta': px.colors.qualitative.Safe[2],
+        'jijik': px.colors.qualitative.Safe[6],
+        'takut': px.colors.qualitative.Safe[7],
+    }
+    fig_emotion = px.pie(
+        emotion_counts, 
+        values=emotion_counts.values, 
+        names=emotion_counts.index, 
+        title='Emotion Distribution', 
+        width=400, 
+        height=400, 
+        color=emotion_counts.index, 
+        color_discrete_map=emotion_colors
+    )
 
     # Calculate emotion average
     emotion_average = df['Score Emotion'].mean()
