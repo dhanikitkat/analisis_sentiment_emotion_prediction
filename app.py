@@ -18,7 +18,7 @@ nltk.download('punkt')
 nltk.download('stopwords')
 
 # Load pipelines
-sentiment_pipe = pipeline("text-classification", model="ayameRushia/bert-base-indonesian-1.5G-sentiment-analysis-smsa")
+sentiment_pipe = pipeline("text-classification", model="dhanikitkat/indo_smsa-1.5G_sentiment_analysis") 
 emotion_pipe = pipeline("text-classification", model="azizp128/prediksi-emosi-indobert")
 
 def load_slank_formal(file):
@@ -48,7 +48,7 @@ def preprocess_text(text, slank_formal_df):
     text = re.sub(r'[&%]', lambda x: f' {x.group()} ', text)
     text = re.sub(r'(\w)\1{1,}', r'\1\1', text)
     text = re.sub(r'\s+', ' ', text).strip()
-    text = re.sub(r'\s*-\s*', '-', text)
+    text = re.sub(r'\b(\w+)\b\s*-\s*\b\1\b', r'\1-\1', text)
     text = re.sub(r'(?<=\d)\s*\.\s*(?=\d)', '.', text)
     text = re.sub(r'(?<=\d)\s*,\s*(?=\d)', ',', text)
     text = re.sub(r'\s+', ' ', text).strip()
